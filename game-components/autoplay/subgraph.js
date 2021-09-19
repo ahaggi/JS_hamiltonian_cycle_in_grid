@@ -1,21 +1,26 @@
 
-import { gridSideLen , totalNrOfCells} from '../grid.js'
+import { gridSideLen, totalNrOfCells } from '../grid.js'
 import {
 
-    calc_pivots_other_to_this_upper_wall,
-    calc_pivots_other_to_this_left_T_wall,
-    calc_pivots_other_to_this_lower_wall,
-    calc_pivots_other_to_this_rigth_T_wall,
+    calc_pivots_other_to_this_upper_wall_by_row,
+    calc_pivots_other_to_this_left_T_wall_by_row,
+    calc_pivots_other_to_this_lower_wall_by_row,
+    calc_pivots_other_to_this_rigth_T_wall_by_row,
+
+    calc_pivots_other_to_this_upper_wall_by_section,
+    calc_pivots_other_to_this_left_T_wall_by_section,
+    calc_pivots_other_to_this_lower_wall_by_section,
+    calc_pivots_other_to_this_rigth_T_wall_by_section,
 
 } from './bitwise-filter-gen.js'
-import {  NR_OF_SECTIONS, calc_section_index, calc_section_T_index,   gen_indexing_matrix_mask, my_find_index } from './bitwise-help-functions.js'
+import { NR_OF_SECTIONS, calc_section_index, calc_section_T_index, SECTIONS_PER_ROW, gen_indexing_matrix_mask, my_find_index } from './bitwise-help-functions.js'
 
 
 const floor = Math.floor
 
 
 
-  class Node {
+class Node {
     constructor(v) {
         this.value = v
         this.x = floor(v / gridSideLen)
@@ -26,7 +31,7 @@ const floor = Math.floor
 }
 
 
- class SubGraph {
+class SubGraph {
     /**
     The most time consuming operations in this class are the flwg operations:
     - splicing (insertion a new nodes / other path) into this subgraph's path.
@@ -296,6 +301,31 @@ const floor = Math.floor
 
 
     spliceIn(other, atIndex, other_new_root_index) {
+        let duplicate = other.path.some(node => this.path.includes(node))
+
+
+
+
+
+
+
+
+
+
+        if (duplicate)
+            throw `Subgraph.spliceIn: Trying to add some nodes that'd been added before!`
+
+
+
+
+
+
+
+
+
+
+
+
 
         if (other_new_root_index > 0) {
             //this will set the otherRoot and otherLeaf at the required pos.
@@ -379,10 +409,32 @@ const floor = Math.floor
 
 
 
+        let calc_pivots_other_to_this_upper_wall
+        let calc_pivots_other_to_this_left_T_wall
+        let calc_pivots_other_to_this_lower_wall
+        let calc_pivots_other_to_this_rigth_T_wall
+        let TREVERSE_BY
+
+
+        if (SECTIONS_PER_ROW > 0) { // gridSideLen >= BITS_PER_SECTION
+            // This means that to represent 1 row we need  multiple sections 
+            TREVERSE_BY = NR_OF_SECTIONS
+            calc_pivots_other_to_this_upper_wall = calc_pivots_other_to_this_upper_wall_by_row
+            calc_pivots_other_to_this_left_T_wall = calc_pivots_other_to_this_left_T_wall_by_row
+            calc_pivots_other_to_this_lower_wall = calc_pivots_other_to_this_lower_wall_by_row
+            calc_pivots_other_to_this_rigth_T_wall = calc_pivots_other_to_this_rigth_T_wall_by_row
+        } else {
+            TREVERSE_BY = gridSideLen
+
+            calc_pivots_other_to_this_upper_wall = calc_pivots_other_to_this_upper_wall_by_section
+            calc_pivots_other_to_this_left_T_wall = calc_pivots_other_to_this_left_T_wall_by_section
+            calc_pivots_other_to_this_lower_wall = calc_pivots_other_to_this_lower_wall_by_section
+            calc_pivots_other_to_this_rigth_T_wall = calc_pivots_other_to_this_rigth_T_wall_by_section
+        }
 
         let option = null
 
-        for (let i = 0; (i < NR_OF_SECTIONS) && (!option); i++) { //  && !found
+        for (let i = 0; (i < TREVERSE_BY) && (!option); i++) { //  && !found
             option = (!option) ? calc_pivots_other_to_this_upper_wall(i, this, other) : option
             option = (!option) ? calc_pivots_other_to_this_left_T_wall(i, this, other) : option
             option = (!option) ? calc_pivots_other_to_this_lower_wall(i, this, other) : option
@@ -494,7 +546,7 @@ const floor = Math.floor
 const orderedNodes = Array.from({ length: (totalNrOfCells) }, (_, i) => new Node(i))
 
 
-export{
+export {
     Node,
     SubGraph,
     orderedNodes

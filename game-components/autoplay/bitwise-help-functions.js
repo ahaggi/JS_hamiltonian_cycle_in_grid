@@ -17,8 +17,36 @@ const ceil = Math.ceil
 
 const MAX_USABLE_BITS = 32
 let nr_of_rows_per_section = floor(MAX_USABLE_BITS / gridSideLen)
-const BITS_PER_SECTION = nr_of_rows_per_section * gridSideLen
-const NR_OF_SECTIONS = ceil((totalNrOfCells) / BITS_PER_SECTION)
+
+
+let temp_bits_per_section
+let temp_nr_of_sections
+
+if (gridSideLen < MAX_USABLE_BITS) {
+  temp_bits_per_section = nr_of_rows_per_section * gridSideLen
+  temp_nr_of_sections = ceil((totalNrOfCells) / temp_bits_per_section)
+} else {
+
+  let found = false
+  let j = MAX_USABLE_BITS;
+  while (j > 0 && !found) {
+    if ((gridSideLen % j) == 0) {
+      found = true
+      temp_bits_per_section = j
+      // console.log(`i  ${i}   ,  BITS_PER_SECTION   ${j}`)
+    }
+    j--
+  }
+  if (!temp_bits_per_section) throw `can't compute a BITS_PER_SECTION for the gridSideLen ${gridSideLen}!`
+
+  temp_nr_of_sections = totalNrOfCells / temp_bits_per_section
+
+}
+const SECTIONS_PER_ROW = floor(gridSideLen / temp_bits_per_section)
+const BITS_PER_SECTION = temp_bits_per_section
+const NR_OF_SECTIONS = temp_nr_of_sections
+
+
 
 
 console.log(`gridSideLen ${gridSideLen}`)
@@ -308,6 +336,7 @@ const my_find_index = (nodeValue, index_matrix_mask) => {
 export {
   BITS_PER_SECTION,
   NR_OF_SECTIONS,
+  SECTIONS_PER_ROW,
   calc_section_index,
   calc_section_T_index,
   msb,
