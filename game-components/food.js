@@ -56,12 +56,13 @@ const getExpansionRate = () => {
     X: currnet snake length
   */
 
-  let minSnakeLen = 1
-  let maxSnakeLen = totalNrOfCells
-  let minExpansionRate = 1
-  let maxExpansionRate = 5
-  let currentSnakeLen = getSnakeLen()
-  return Math.floor((((currentSnakeLen - minSnakeLen) / (minSnakeLen - maxSnakeLen) * (minExpansionRate - maxExpansionRate)) * -1) + maxExpansionRate)
+  // let minSnakeLen = 1
+  // let maxSnakeLen = totalNrOfCells
+  // let minExpansionRate = 1
+  // let maxExpansionRate = 5
+  // let currentSnakeLen = getSnakeLen()
+  // return Math.floor((((currentSnakeLen - minSnakeLen) / (minSnakeLen - maxSnakeLen) * (minExpansionRate - maxExpansionRate)) * -1) + maxExpansionRate)
+  return 1
 }
 
 // For testing/ simulating

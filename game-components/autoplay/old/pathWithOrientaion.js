@@ -1,4 +1,4 @@
-import { gridSideLen } from "../grid.js"
+import { gridSideLen } from "../../grid.js"
 
 
 const Orientation = {

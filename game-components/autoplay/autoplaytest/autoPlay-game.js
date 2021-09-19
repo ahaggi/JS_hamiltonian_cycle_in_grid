@@ -58,7 +58,7 @@ const main = () => {
 
     console.log("started")
 
-    for (let index = 0; index < 100; index++) {
+    for (let index = 0; index < 2000; index++) {
 
         console.log("running..")
 
