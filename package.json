@@ -1,0 +1,28 @@
+{
+  "name": "hamiltonian_cycle_in_grid",
+  "version": "1.0.0",
+  "description": "",
+  "main": "game.js",
+  "scripts": {
+    "start": "parcel ./index.html",
+    "dev": "parcel ./index.html",
+    "build": "parcel build ./index.html",
+    "heroku-postbuild": "parcel build ./index.html"
+  },
+  "engines": {
+    "node": "v14.16.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahaggi/JS_hamiltonian_cycle_in_grid.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ahaggi/JS_hamiltonian_cycle_in_grid/issues"
+  },
+  "homepage": "https://github.com/ahaggi/JS_hamiltonian_cycle_in_grid#readme",
+  "dependencies": {
+    "parcel-bundler": "1.12.5"
+  }
+}
