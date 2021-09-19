@@ -1,27 +1,27 @@
 
-import { requestHamCycleChange } from './autoplay/autoPlay.js'
 import { randomGridPosition, gridSideLen } from './grid.js'
-import { onSnake, updateNewFoodPosition } from './snake.js'
+
+
+
 
 
 var food
 var isEaten
-const init = () => {
-  // food = { x: 1, y: 3}
 
-  food = getRandomFoodPosition()
-
-  updateNewFoodPosition(food)
+const init = (playerSnake, autoSnake) => {
+  food = getRandomFoodPosition(playerSnake, autoSnake)
+  playerSnake.updateNewFoodPosition(food)
+  autoSnake.updateNewFoodPosition(food)
   isEaten = false
 }
 
 
-const update = () => {
-
+const update = (playerSnake, autoSnake) => {
   if (isEaten) {
-    food = getRandomFoodPosition()
+    food = getRandomFoodPosition(playerSnake, autoSnake)
     isEaten = false
-    updateNewFoodPosition(food)
+    playerSnake.updateNewFoodPosition(food)
+    autoSnake.updateNewFoodPosition(food)
   }
 }
 
@@ -29,18 +29,24 @@ const requireNewFood = () => {
   isEaten = true
 }
 
-const draw = (gameBoard) => {
+const draw = (playerGameBoard, autoGameBoard) => {
   let elmIndx = (food.x * gridSideLen) + food.y
-  const foodElement = gameBoard.children[elmIndx]
-  foodElement.classList.add('food')
+  const playerFoodElement = playerGameBoard.children[elmIndx]
+  // clear all other classes, i.e "path-vl-line"
+  playerFoodElement.className = "cell"
+  playerFoodElement.classList.add('food')
+
+  const autoFoodElement = autoGameBoard.children[elmIndx]
+  // clear all other classes, i.e "path-vl-line"
+  autoFoodElement.className = "cell"
+  autoFoodElement.classList.add('food')
 }
 
-const getRandomFoodPosition = () => {
+const getRandomFoodPosition = (playerSnake, autoSnake) => {
   let newFoodPosition
-  while (newFoodPosition == null || onSnake(newFoodPosition)) {
+  while (newFoodPosition == null || playerSnake.onSnake(newFoodPosition) || autoSnake.onSnake(newFoodPosition)) {
     newFoodPosition = randomGridPosition()
   }
-
   return newFoodPosition
 }
 
@@ -49,11 +55,11 @@ const getFoodPosition = () => {
 }
 
 
+
 // For testing/ simulating
 const setFoodPosition = (f) => {
   food = f
 }
-
 
 
 // const getExpansionRate = () => {
@@ -77,6 +83,8 @@ const setFoodPosition = (f) => {
 //   // return Math.floor((((currentSnakeLen - minSnakeLen) / (minSnakeLen - maxSnakeLen) * (minExpansionRate - maxExpansionRate)) * -1) + maxExpansionRate)
 //   return 1
 // }
+
+
 
 export {
   init,

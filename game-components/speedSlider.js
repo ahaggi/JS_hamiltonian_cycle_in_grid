@@ -2,29 +2,32 @@
 
 
 var slider = document.getElementById("speed-range");
-const changeSpeed = (sliderValue) => {
+var spanValue = document.getElementById("speed-range-value");
+
+const changeSpeed = (value) => {
   /*
     Y = ((X - A) / (A - B) * (C - D)) * -1 + D
 
     A: min precentage value
     B: max precentage value
 
-    C: min allowed snakeSpeed
-    D: max allowed snakeSpeed
+    C: max allowed snakeSpeed
+    D: min allowed snakeSpeed
 
     X: currnet precentage value
 */
 
-  slider.value = sliderValue
+  slider.value = value
+  spanValue.innerHTML = value
+  let minPrecentageValue = value < 90 ? 1 : 90
+  let maxPrecentageValue = value < 90 ? 90 : 100
+  let maxAllowedSnakeSpeed = value < 90 ? 15 : 60
+  let minAllowedSnakeSpeed = value < 90 ? 2 : 15
+  let currentPrecentageValue = value
+  snakeSpeed = ((((currentPrecentageValue - minPrecentageValue) / (minPrecentageValue - maxPrecentageValue) * (maxAllowedSnakeSpeed - minAllowedSnakeSpeed)) * -1) + minAllowedSnakeSpeed)
 
-  let minPrecentageValue = 1
-  let maxPrecentageValue = 100
-  let minAllowedSnakeSpeed = 60
-  let maxAllowedSnakeSpeed = 2
-  let currentPrecentageValue = sliderValue
-  snakeSpeed = ((((currentPrecentageValue - minPrecentageValue) / (minPrecentageValue - maxPrecentageValue) * (minAllowedSnakeSpeed - maxAllowedSnakeSpeed)) * -1) + maxAllowedSnakeSpeed)
   // console.log(snakeSpeed)
-  // console.log(currentPrecentageValue)
+
 }
 
 slider.addEventListener("input", (e) => changeSpeed(e.target.value));
@@ -43,7 +46,7 @@ window.addEventListener('keydown', e => {
 })
 
 
-changeSpeed(12)
+changeSpeed(50)
 
 export {
     snakeSpeed

@@ -1,7 +1,7 @@
 
 
-const gridSideLen = 10 // If the game is in autoplay mode, then this number has to be an even number 
-const totalNrOfCells =  gridSideLen * gridSideLen
+var gridSideLen = 20  // If the game is in autoplay mode, then this number has to be an even number 
+var totalNrOfCells =  gridSideLen * gridSideLen
 
 const randomGridPosition = () => {
   return {
@@ -17,9 +17,15 @@ const outsideGrid = (position) => {
   )
 }
 
+const setGridSideLen = (nr)=>{
+  gridSideLen = nr
+  totalNrOfCells =  gridSideLen * gridSideLen
+}
+
 export {
   gridSideLen ,
   totalNrOfCells,
   randomGridPosition,
   outsideGrid,
+  setGridSideLen
 }

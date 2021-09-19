@@ -57,9 +57,8 @@ const init = () => {
 const main = () => {
 
     console.log("started")
-    const t0 = performance.now();
 
-    for (let index = 0; index < 2000; index++) {
+    for (let index = 0; index < 100; index++) {
 
         console.log("running..")
 
@@ -86,8 +85,6 @@ const main = () => {
 
 
     }
-    const t1 = performance.now();
-    console.log(`Call to changeHamCycle took ${t1 - t0} ms.`);
 
     saveLog()
     console.log("finished")

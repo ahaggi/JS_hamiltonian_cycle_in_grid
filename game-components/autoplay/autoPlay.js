@@ -1,6 +1,3 @@
-import { setInputDirection } from './input.js'
-import { getSnakeHead, getSnakeLen, onSnake } from '../snake.js'
-
 import { visualizeHC, } from './hamCycleGridVisualization.js'
 
 import { getFoodPosition } from "../food.js"
@@ -361,7 +358,7 @@ const getEdgeCost = (direction) => {
 }
 
 const findCurrentHamCyclNodeIndex = () => {
-    let snakeHead = getSnakeHead()
+    let snakeHead = snake.getSnakeHead()
     let currentHamCyclNodeValue = snakeHead.x * gridSideLen + snakeHead.y
     currentHamCyclNodeIndex = HC.indexOf(currentHamCyclNodeValue)
 }
@@ -372,7 +369,7 @@ const requestHamCycleChange = () => {
 }
 
 
-const excuteMove = () => {
+const excuteMove = (autoInput) => {
 
     if (currentHamCyclNodeIndex == null || currentHamCyclNodeIndex < 0 || currentHamCyclNodeIndex > gridSideLen) {
         // currentHamCyclNodeIndex is undifined
@@ -380,13 +377,11 @@ const excuteMove = () => {
     }
 
 
-    if (HamCycleStatus == Status.CHECK_NEXT_CYCLE && isChangingWorthwhile()) {
+    if (HamCycleStatus == Status.CHECK_NEXT_CYCLE && (hcChangeNecessity === HamCycleChangeNecessity.ALWAYS || isChangingWorthwhile())) {
         // const t0 = performance.now();
         changeHamCycle()
         // const t1 = performance.now();
         // console.log(`Call to changeHamCycle took ${t1 - t0} ms.`);
-    } else {
-        HamCycleStatus = Status.CONNECTED_OK
     }
 
     let nextNdx = (currentHamCyclNodeIndex + 1) % HC.length
@@ -415,7 +410,7 @@ const excuteMove = () => {
         throw 'the move is between 2 nodes without and edge!\n\n\n'
 
     }
-    setInputDirection(nextMove)
+    autoInput.setInputDirection(nextMove)
 
     currentHamCyclNodeIndex = nextNdx
 }
@@ -478,20 +473,6 @@ const isChangingWorthwhile = () => {
 
     return worthwhile
 }
-
-
-const Status = {
-    CHECK_NEXT_CYCLE: "CHECK_NEXT_CYCLE",
-    CONNECTED_OK: "CONNECTED_OK",
-}
-
-const Direction = {
-    DOWN: "DOWN",
-    UP: "UP",
-    RIGHT: "RIGHT",
-    LEFT: "LEFT",
-}
-
 
 const changeHamCycle = () => {
 
@@ -810,7 +791,7 @@ const isValidCuttingPathSections = (cuttingPathSections, srcNodeValue) => {
 
             let x = orderedNodes[nodeValue].x
             let y = orderedNodes[nodeValue].y
-            valid = continuous && !onSnake({ x, y })
+            valid = continuous && !snake.onSnake({ x, y })
         }
     }
     return valid
@@ -922,7 +903,7 @@ const genNewHC = (cuttingPathNodes, cuttingPathIndecies, targetNodeIndex) => {
         // - the snakeHead initial pos before making any move.
         //   Note: we add 1 to the CuttingPath in the max(… , cuttingPath+1) ,, to include the (initial pos before making any move) to the notConnectableRange
 
-        let rangFmIndex = _newhcNodes.length - max(getSnakeLen(), (cuttingPathNodes.length + 1))
+        let rangFmIndex = _newhcNodes.length - max(snake.getSnakeLen(), (cuttingPathNodes.length + 1))
         notConnectableRange.formIndex = rangFmIndex
         notConnectableRange.toIndex = _newhcNodes.length - 1 // this will yields the snakeHead pos when snakeHead reaches the target
 
@@ -940,7 +921,7 @@ const genNewHC = (cuttingPathNodes, cuttingPathIndecies, targetNodeIndex) => {
         // - the snakeTail pos when snakeHead reaches the target, OR
         // - the snakeHead initial pos before making any move.
         //   Note: we add 1 to the CuttingPath in the max(… , cuttingPath+1) ,, to include the (initial pos before making any move) to the notConnectableRange
-        let rangFmIndex = _newhcNodes.length - unaffectedPathAfterTarget.length - max(getSnakeLen(), (cuttingPathNodes.length + 1))
+        let rangFmIndex = _newhcNodes.length - unaffectedPathAfterTarget.length - max(snake.getSnakeLen(), (cuttingPathNodes.length + 1))
         notConnectableRange.formIndex = rangFmIndex
         notConnectableRange.toIndex = (_newhcNodes.length - 1) - unaffectedPathAfterTarget.length // this will yields the snakeHead pos when snakeHead reaches the target
 
@@ -1013,26 +994,26 @@ const reconnectGraph = (isolatedSubgraphList) => {
     } else {
 
         // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤DEV visulize path¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
-        isolatedSubgraphList.forEach(g => {
-            let path = g.path.map(n => n.value)
-            visualizeHC(path)
-        })
-        visualizeHC(newHC.path.map(n => n.value))
+        // isolatedSubgraphList.forEach(g => {
+        //     let path = g.path.map(n => n.value)
+        //     visualizeHC(path)
+        // })
+        // visualizeHC(newHC.path.map(n => n.value))
 
-        let food = getFoodPosition()
-        visualizeHC([(food.x * gridSideLen) + food.y])
+        // let food = getFoodPosition()
+        // visualizeHC([(food.x * gridSideLen) + food.y])
 
-        let snakeLen = getSnakeLen()
+        // let snakeLen = getSnakeLen()
 
-        let snakeTail = ((currentHamCyclNodeIndex - (getSnakeLen() - 1)) + totalNrOfCells) % totalNrOfCells
-        let snake = circularSlice(HC, snakeTail, (currentHamCyclNodeIndex + 1) % totalNrOfCells)
-        visualizeHC(snake)
+        // let snakeTail = ((currentHamCyclNodeIndex - (getSnakeLen() - 1)) + totalNrOfCells) % totalNrOfCells
+        // let snake = circularSlice(HC, snakeTail, (currentHamCyclNodeIndex + 1) % totalNrOfCells)
+        // visualizeHC(snake)
         // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
 
 
         // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤DEV visulize path¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
         // console.log("isConnected is false")
-        visualizeHC(HC)
+        // visualizeHC(HC)
         // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
 
     }
@@ -1046,7 +1027,7 @@ const assert_newHC_validity = (newHC) => {
         snakeHead: null,
         food: null
     }
-    let headPos = getSnakeHead()
+    let headPos = snake.getSnakeHead()
     let head = headPos.x * gridSideLen + headPos.y
 
     let foodPos = getFoodPosition()
@@ -1129,13 +1110,6 @@ const reconnectIsolatedSubgraphsWithRotation_Rec = (isolatedSubgraphList) => {
 
         if (found) {
             isolatedSubgraphList.splice(i, 1)
-            // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤DEV visulize path¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
-            isolatedSubgraphList.forEach(g => {
-                let path = g.path.map(n => n.value)
-                visualizeHC(path)
-            })
-            visualizeHC(newHC.path.map(n => n.value))
-            // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
 
             if (!newHC.isCyclic) {
                 // if the lately updated newHC is NOT cyclic, the first try to  reconnect the rest of isolatedSubgraphList without a rotation.
@@ -1171,13 +1145,6 @@ const reconnectIsolatedSubgraphs_Rec = (isolatedSubgraphList) => {
             newHC.spliceIn(isg, option.insertOtherAtIndex, option.otherNrOfShifts)
             isolatedSubgraphList.splice(i, 1)
 
-            // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤DEV visulize path¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
-            isolatedSubgraphList.forEach(g => {
-                let path = g.path.map(n => n.value)
-                visualizeHC(path)
-            })
-            visualizeHC(newHC.path.map(n => n.value))
-            // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
 
             reconnectIsolatedSubgraphs_Rec(isolatedSubgraphList)
         }
@@ -1186,8 +1153,30 @@ const reconnectIsolatedSubgraphs_Rec = (isolatedSubgraphList) => {
 
 }
 
+const Status = {
+    CHECK_NEXT_CYCLE: "CHECK_NEXT_CYCLE",
+    CONNECTED_OK: "CONNECTED_OK",
+}
 
-const orderedNodes = Array.from({ length: (totalNrOfCells) }, (_, i) => new Node(i))
+const Direction = {
+    DOWN: "DOWN",
+    UP: "UP",
+    RIGHT: "RIGHT",
+    LEFT: "LEFT",
+}
+
+const debug = {
+    prevHC: [],
+    snakeHead: null,
+    food: null
+}
+
+const HamCycleChangeNecessity = {
+    IF_NECESSARY: "IF_NECESSARY",
+    ALWAYS: "ALWAYS",
+}
+
+var orderedNodes
 
 var HamCycleStatus
 
@@ -1197,10 +1186,20 @@ var HC
 
 let currentHamCyclNodeIndex
 
-const init = () => {
+var snake
+
+var hcChangeNecessity
+
+const init = (_snake, hcChangeNec) => {
+
+    orderedNodes = Array.from({ length: (totalNrOfCells) }, (_, i) => new Node(i))
+
     HamCycleStatus = Status.CHECK_NEXT_CYCLE
     newHC = []
     HC = []
+    snake = _snake
+    hcChangeNecessity = hcChangeNec
+
     let delta = 1
     let v = -1
     for (let i = 0; i < gridSideLen; i++) {
@@ -1232,6 +1231,6 @@ export {
     HC,
     excuteMove,
     changeHamCycle,
-    requestHamCycleChange
-
+    requestHamCycleChange,
+    HamCycleChangeNecessity
 }

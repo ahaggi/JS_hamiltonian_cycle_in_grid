@@ -1,8 +1,8 @@
 // This file only task is to visualize the currnet hamiltonian cycle.
 
-import { gridSideLen } from '../grid.js'
+import { gridSideLen , totalNrOfCells} from '../grid.js'
 import { HC } from './autoPlay.js'
-import { gameBoard, totalNrOfCells } from './gameBoard.js'
+import { autoGameBoard } from './game.js'
 
 
 
@@ -17,10 +17,7 @@ const cssClassPathErr = 'path-err'
 
 
 
-
-
-
-// const cells  = gameBoard.children
+// const cells  = autoGameBoard.children
 // for (let index = 0; index < cells.length; index++) {
 //     const p = document.createElement('p')
 //     cells[index].appendChild(p)
@@ -32,44 +29,44 @@ const cssClassPathErr = 'path-err'
 
 
 const visualizeHC = (path = HC) => {
-    const nrOfCells = path.length // = totalNrOfCells
-    let { r, g, b } = randBackgroundColr()
+    // const nrOfCells = path.length // = totalNrOfCells
+    // let { r, g, b } = randBackgroundColr()
 
-    let bgc = nrOfCells != (totalNrOfCells) ? "rgb(" + r + "," + b + "," + g + ")" : null
+    // let bgc = nrOfCells != (totalNrOfCells) ? "rgb(" + r + "," + b + "," + g + ")" : null
 
-    for (let i = 0; i < nrOfCells; i++) {
-        let prev = (nrOfCells + i - 1) % nrOfCells
-        let curr = i
-        let next = (i + 1) % nrOfCells
-        let from = path[prev] - path[curr]
-        let to = path[curr] - path[next]
+    // for (let i = 0; i < nrOfCells; i++) {
+    //     let prev = (nrOfCells + i - 1) % nrOfCells
+    //     let curr = i
+    //     let next = (i + 1) % nrOfCells
+    //     let from = path[prev] - path[curr]
+    //     let to = path[curr] - path[next]
 
-        let cssPath = ''
-        if ((from == 1 && to == 1) || (from == -1 && to == -1))
-            cssPath = cssClassHZline
-        else if ((from == -(gridSideLen) && to == -(gridSideLen)) || (from == gridSideLen && to == gridSideLen))
-            cssPath = cssClassVLline
-        else if ((from == gridSideLen && to == 1) || (from == -1 && to == -(gridSideLen)))
-            cssPath = cssClassleftDownline
-        else if ((from == -1 && to == gridSideLen) || (from == -(gridSideLen) && to == 1))
-            cssPath = cssClassleftUpline
-        else if ((from == 1 && to == -(gridSideLen)) || (from == gridSideLen && to == -1))
-            cssPath = cssClassrightDownline
-        else if ((from == -(gridSideLen) && to == -1) || (from == 1 && to == gridSideLen))
-            cssPath = cssClassrightUpline
-        else {
-            cssPath = cssClassPathErr
-            // throw `Err in the func "visualizeHC" the current node is ${path[i - 1]} BUT the next is ${path[i]}!`;
-        }
-        setCellPath(path[i], cssPath)
-        // setCellText(path[i])
+    //     let cssPath = ''
+    //     if ((from == 1 && to == 1) || (from == -1 && to == -1))
+    //         cssPath = cssClassHZline
+    //     else if ((from == -(gridSideLen) && to == -(gridSideLen)) || (from == gridSideLen && to == gridSideLen))
+    //         cssPath = cssClassVLline
+    //     else if ((from == gridSideLen && to == 1) || (from == -1 && to == -(gridSideLen)))
+    //         cssPath = cssClassleftDownline
+    //     else if ((from == -1 && to == gridSideLen) || (from == -(gridSideLen) && to == 1))
+    //         cssPath = cssClassleftUpline
+    //     else if ((from == 1 && to == -(gridSideLen)) || (from == gridSideLen && to == -1))
+    //         cssPath = cssClassrightDownline
+    //     else if ((from == -(gridSideLen) && to == -1) || (from == 1 && to == gridSideLen))
+    //         cssPath = cssClassrightUpline
+    //     else {
+    //         cssPath = cssClassPathErr
+    //         // throw `Err in the func "visualizeHC" the current node is ${path[i - 1]} BUT the next is ${path[i]}!`;
+    //     }
+    //     setCellPath(path[i], cssPath)
+    //     // setCellText(path[i])
 
-        setCellColors(path[i], bgc)
-    }
+    //     // setCellColors(path[i], bgc)
+    // }
 }
 
 const setCellColors = (childIndex, bgColor) => {
-    let pathCellElement = gameBoard.children[childIndex]
+    let pathCellElement = autoGameBoard.children[childIndex]
     pathCellElement.style.backgroundColor = bgColor
 
     // let { _r, _b, _g } = inverseColor(r, b, g)
@@ -80,7 +77,7 @@ const setCellColors = (childIndex, bgColor) => {
 }
 
 const setCellText = (childIndex) => {
-    let pathCellElement = gameBoard.children[childIndex]
+    let pathCellElement = autoGameBoard.children[childIndex]
     pathCellElement.children[0].innerText = childIndex
 }
 
@@ -92,7 +89,7 @@ const randBackgroundColr = () => {
 }
 
 const setCellPath = (childIndex, cssPath) => {
-    let pathCellElement = gameBoard.children[childIndex]
+    let pathCellElement = autoGameBoard.children[childIndex]
     pathCellElement.classList.add(cssPath)
 }
 
