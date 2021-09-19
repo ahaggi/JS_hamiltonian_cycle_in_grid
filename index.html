@@ -116,7 +116,7 @@
       height: 20vmin;
     }
 
-    #game-board-player {
+    #game-board {
       display: grid;
       background-color: #CCC;
       width: 80vmin;
@@ -169,15 +169,75 @@
     }
 
 
+    /* *********************************************************/
+    /* css to visualize the hamiltonian cycle */
+    /* *********************************************************/
+    .cell p {
+      text-align: center;
+      vertical-align: middle;
+      color: #FFF;
+      font-size: calc(0.2* 100vmin / 8)
+    }
+
+    .path-vl-line {
+      background-image: url('./resources/autoplay-imgs/vl.png');
+      background-repeat: no-repeat;
+      background-attachment: local;
+      background-size: 100% 100%;
+    }
+
+    .path-hz-line {
+      background-image: url('./resources/autoplay-imgs/hz.png');
+      background-repeat: no-repeat;
+      background-attachment: local;
+      background-size: 100% 100%;
+    }
+
+    .path-left-down-line {
+      background-image: url('./resources/autoplay-imgs/left-down.png');
+      background-repeat: no-repeat;
+      background-attachment: local;
+      background-size: 100% 100%;
+    }
+
+    .path-left-up-line {
+      background-image: url('./resources/autoplay-imgs/left-up.png');
+      background-repeat: no-repeat;
+      background-attachment: local;
+      background-size: 100% 100%;
+    }
+
+    .path-right-down-line {
+      background-image: url('./resources/autoplay-imgs/right-down.png');
+      background-repeat: no-repeat;
+      background-attachment: local;
+      background-size: 100% 100%;
+    }
+
+    .path-right-up-line {
+      background-image: url('./resources/autoplay-imgs/right-up.png');
+      background-repeat: no-repeat;
+      background-attachment: local;
+      background-size: 100% 100%;
+    }
+
+    .path-err {
+      background-color: red;
+    }
+
+    /* *********************************************************/
   </style>
 
   <script src="./game.js" defer></script>
+  <!-- <script src="./game-components/autoplay/autoplaytest/autoPlay-game.js" defer></script> -->
+  <!-- <script src="./game-components/autoplay/autoplaytest/simulate.js" defer></script> -->
 
 </head>
 
 <body>
   <div class="container">
     <div class="container-top">
+      <!-- <div id="game-board-autoplay"></div> -->
       <div class="form-container">
 
         <div class="range-slider">
@@ -188,7 +248,7 @@
       </div>
 
     </div>
-    <div id="game-board-player"></div>
+    <div id="game-board"></div>
   </div>
 </body>
 

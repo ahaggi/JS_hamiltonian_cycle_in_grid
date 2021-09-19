@@ -1,5 +1,6 @@
 
-const gridSideLen = 20 // If the game is in autoplay mode, then this number has to be an even number 
+
+const gridSideLen = 10 // If the game is in autoplay mode, then this number has to be an even number 
 const totalNrOfCells =  gridSideLen * gridSideLen
 
 const randomGridPosition = () => {

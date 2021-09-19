@@ -1,5 +1,6 @@
 
-import { randomGridPosition, gridSideLen } from './grid.js'
+import { requestHamCycleChange } from './autoplay/autoPlay.js'
+import { randomGridPosition, gridSideLen, totalNrOfCells } from './grid.js'
 import { onSnake, expandSnake, getSnakeLen } from './snake.js'
 
 
@@ -17,6 +18,9 @@ const update = () => {
     // console.log(expansionRate)
     expandSnake(expansionRate)
     food = getRandomFoodPosition()
+      // Inorder to try to recompute the new Ham. cycle
+  requestHamCycleChange()
+
   }
 }
 
@@ -31,6 +35,7 @@ const getRandomFoodPosition = () => {
   while (newFoodPosition == null || onSnake(newFoodPosition)) {
     newFoodPosition = randomGridPosition()
   }
+
   return newFoodPosition
 }
 
@@ -52,11 +57,16 @@ const getExpansionRate = () => {
   */
 
   let minSnakeLen = 1
-  let maxSnakeLen = gridSideLen * gridSideLen
+  let maxSnakeLen = totalNrOfCells
   let minExpansionRate = 1
   let maxExpansionRate = 5
   let currentSnakeLen = getSnakeLen()
   return Math.floor((((currentSnakeLen - minSnakeLen) / (minSnakeLen - maxSnakeLen) * (minExpansionRate - maxExpansionRate)) * -1) + maxExpansionRate)
+}
+
+// For testing/ simulating
+const setFoodPosition = (f) => {
+  food = f
 }
 
 
@@ -65,5 +75,6 @@ export {
   init,
   update,
   draw,
-  getFoodPosition
+  getFoodPosition,
+  setFoodPosition
 }

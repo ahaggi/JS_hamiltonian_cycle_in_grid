@@ -23,8 +23,8 @@ const changeSpeed = (sliderValue) => {
   let maxAllowedSnakeSpeed = 2
   let currentPrecentageValue = sliderValue
   snakeSpeed = ((((currentPrecentageValue - minPrecentageValue) / (minPrecentageValue - maxPrecentageValue) * (minAllowedSnakeSpeed - maxAllowedSnakeSpeed)) * -1) + maxAllowedSnakeSpeed)
-  console.log(snakeSpeed)
-  console.log(currentPrecentageValue)
+  // console.log(snakeSpeed)
+  // console.log(currentPrecentageValue)
 }
 
 slider.addEventListener("input", (e) => changeSpeed(e.target.value));

@@ -1,5 +1,6 @@
-import PlayerInput from './player/input.js'
 
+
+import {  getInputDirection , resetInputDirection } from './autoplay/input.js'
 import { gridSideLen } from './grid.js'
 
 
@@ -7,7 +8,7 @@ import { gridSideLen } from './grid.js'
 const snakeBody = []
 let newSegments = 0
 
-var inputController
+
 var inputDirection
 
 const init = () => {
@@ -19,15 +20,15 @@ const init = () => {
   snakeBody.push(headInitPos)
   // console.log(` head Init Pos x: ${headInitPos.x} , y: ${headInitPos.y}`)
   newSegments = 0
-  inputController = new PlayerInput()
+
   // reset InputDirection for a new game
-  inputController.ResetInputDirection()
+  resetInputDirection()
 }
 
 const update = () => {
   addSegments()
 
-  inputDirection = inputController.getInputDirection()
+  inputDirection = getInputDirection()
   for (let i = snakeBody.length - 2; i >= 0; i--) {
     snakeBody[i + 1] = { ...snakeBody[i] }
   }
