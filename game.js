@@ -134,7 +134,7 @@ const draw = () => {
 
 const checkGameStatus = () => {
   gameOver = outsideGrid(getSnakeHead()) || snakeIntersection()
-  gameWon = getSnakeLen() >= (totalNrOfCells) - 1
+  gameWon = getSnakeLen() >= (totalNrOfCells) 
   // console.log(`  ${getSnakeLen()}    ${gameWon}`)
 }
 

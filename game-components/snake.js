@@ -1,17 +1,20 @@
 
 
-import {  getInputDirection , resetInputDirection } from './autoplay/input.js'
+import { requestHamCycleChange } from './autoplay/autoPlay.js'
+import { getInputDirection, resetInputDirection } from './autoplay/input.js'
+import { requireNewFood } from './food.js'
 import { gridSideLen } from './grid.js'
 
 
 
 const snakeBody = []
-let newSegments = 0
 
+var food
 
 var inputDirection
 
 const init = () => {
+  // let headInitPos = { x: 1, y: 6 }
   let headInitPos = { x: (gridSideLen / 2), y: (gridSideLen / 2) }
 
   // empty the snakeBody
@@ -19,22 +22,26 @@ const init = () => {
   // Head init pos
   snakeBody.push(headInitPos)
   // console.log(` head Init Pos x: ${headInitPos.x} , y: ${headInitPos.y}`)
-  newSegments = 0
+
 
   // reset InputDirection for a new game
   resetInputDirection()
 }
 
 const update = () => {
-  addSegments()
 
   inputDirection = getInputDirection()
   for (let i = snakeBody.length - 2; i >= 0; i--) {
     snakeBody[i + 1] = { ...snakeBody[i] }
   }
-
   snakeBody[0].x += inputDirection.deltaX
   snakeBody[0].y += inputDirection.deltaY
+
+  if (equalPositions(snakeBody[0], food)) {
+    expandSnake(1)
+    requireNewFood()
+
+  }
 }
 
 const draw = (gameBoard) => {
@@ -74,8 +81,12 @@ const draw = (gameBoard) => {
   }
 }
 
-const expandSnake = (amount) => {
-  newSegments += amount
+const expandSnake = (newSegments) => {
+
+  for (let i = 0; i < newSegments; i++) {
+    snakeBody.push({ ...snakeBody[snakeBody.length - 1] })
+  }
+
 }
 
 const onSnake = (position) => {
@@ -87,7 +98,7 @@ const getSnakeHead = () => {
 }
 
 const snakeIntersection = () => {
-  let [head, ...rest] = snakeBody
+  let [head, _, __, ...rest] = snakeBody
   return rest.some((segment) => equalPositions(segment, head))
 }
 
@@ -99,18 +110,17 @@ const equalPositions = (pos1, pos2) => {
   return pos1.x === pos2.x && pos1.y === pos2.y
 }
 
-const addSegments = () => {
-  for (let i = 0; i < newSegments; i++) {
-    snakeBody.push({ ...snakeBody[snakeBody.length - 1] })
-  }
-
-  newSegments = 0
+const updateNewFoodPosition = (f) => {
+  food = f
+  // Inorder to try to recompute the new Ham. cycle
+  requestHamCycleChange()
 }
 
 export {
   init,
   update,
   draw,
+  updateNewFoodPosition,
   expandSnake,
   onSnake,
   getSnakeHead,

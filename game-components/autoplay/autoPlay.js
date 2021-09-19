@@ -8,6 +8,7 @@ import { gridSideLen, totalNrOfCells } from '../grid.js'
 
 const abs = Math.abs
 const floor = Math.floor
+const max = Math.max
 
 
 const MOVE_UP = { deltaX: -1, deltaY: 0 }
@@ -25,65 +26,6 @@ export class Node {
         this.yIsEven = this.y % 2 == 0
         // this.leadsToNodesValue = this.#genLeadsTo()
         // this.reachedToFromNodesValue = this.#genReachedToFrom()
-    }
-
-    #genLeadsTo() {
-        let leadsToVertically
-        let leadsToHorizontally
-        if (this.xIsEven)
-            //for ex  node 18 can reach to node 17         left
-            //for ex  node 17 can reach to node 16         left
-            leadsToVertically = (floor((this.value - 1) / gridSideLen) == this.x) ? (this.value - 1) : -1   // Important not all node and (node-1) are at the same row,, i.e. node 7 and 8 are not in the same row
-
-        else
-            //for ex  node 14 can reach to node 15         left
-            //for ex  node  9 can reach to node 10         left
-            leadsToVertically = (floor((this.value + 1) / gridSideLen) == this.x) ? (this.value + 1) : -1   // Important not all node and (node+1) are at the same row,, i.e. node 7 and 8 are not in the same row
-
-
-        if (this.yIsEven)
-            //for ex  node 18 can reach to node 26         up
-            //for ex  node 14 can reach to node 22         up
-            leadsToHorizontally = this.value + gridSideLen
-        else
-            //for ex  node 17 can reach to node 9         down 
-            //for ex  node  9 can reach to node 1         down 
-            leadsToHorizontally = this.value - gridSideLen
-        return [leadsToVertically, leadsToHorizontally]
-    }
-
-    #genReachedToFrom() {
-        let reachedToFromVertically
-        let reachedToFromHorizontally
-
-        if (this.xIsEven)
-            //for ex root node 14 can reached from node 13      right
-            //for ex root node  9 can reached from node 8       rigth
-            reachedToFromVertically = (floor((this.value + 1) / gridSideLen) == this.x) ? (this.value + 1) : -1   // Important not all node and (node+1) are at the same row,, i.e. node 7 and 8 are not in the same row
-        else
-            //for ex root node 18 can reached from node 19      left
-            //for ex root node 17 can reached from node 18      left
-            reachedToFromVertically = (floor((this.value - 1) / gridSideLen) == this.x) ? (this.value - 1) : -1   // Important not all node and (node-1) are at the same row,, i.e. node 16 and 15 is not in the same row
-
-        if (this.yIsEven)
-            //for ex root node 18 can reached from node 10         down
-            //for ex root node 14 can reached from node  6         down
-            reachedToFromHorizontally = this.value - gridSideLen
-        else
-            //for ex root node 17 can reached from node 25         up 
-            //for ex root node  9 can reached from node 17         up 
-            reachedToFromHorizontally = this.value + gridSideLen
-
-        return [reachedToFromVertically, reachedToFromHorizontally]
-
-    }
-
-    canLeadsTo(nodeValue) {
-        this.leadsToNodesValue.indexOf(nodeValue) != -1
-    }
-
-    canBeReachedToFrom(nodeValue) {
-        this.reachedToFromNodesValue.indexOf(nodeValue) != -1
     }
 
 }
@@ -112,7 +54,7 @@ export class SubGraph {
         if (newForm_index < 0 || newTo_index >= this.path.length) {
             throw `Subgraph.#checkNotConnectableRangeValidity: Out of bound , newForm_index: ${newForm_index} or newTo_index: ${newTo_index} are out of bound!`
         }
-        if (newForm_index >= newTo_index) {
+        if (newForm_index > newTo_index) {
             throw `Subgraph.#checkNotConnectableRangeValidity: invalid notConnectableRange, newForm_index: ${newForm_index}, newTo_index: ${newTo_index}`
         }
 
@@ -199,12 +141,12 @@ export class SubGraph {
     }
 
     spliceCyclicOtherOptions(other) {
-        let options = []
+        let option = null
 
         if (!other.isCyclic)
             throw 'connectivityOptionsIntoToOther: the other graph is not cyclic'
 
-        for (let i = 0; i < other.path.length; i++) {
+        for (let i = 0; i < other.path.length && !option; i++) {
             if (other.notConnectableRange && i >= other.notConnectableRange.formIndex && i < other.notConnectableRange.toIndex)// note that the last node in (notConnectableRange) "toIndex" can be a valid leaf
                 continue
 
@@ -216,7 +158,7 @@ export class SubGraph {
 
             // let node2canLeadsTo = node2.leadsToNodesValue
             // let node2canBeReachedFrom = node2.reachedToFromNodesValue
-            for (let j = 0; j < this.path.length; j++) {
+            for (let j = 0; j < this.path.length && !option; j++) {
                 if (this.notConnectableRange && j >= this.notConnectableRange.formIndex && j < this.notConnectableRange.toIndex)// note that the last node in (notConnectableRange) "toIndex" can be a valid leaf
                     continue
 
@@ -250,13 +192,12 @@ export class SubGraph {
                         insertOtherAtIndex: (j + 1) % this.path.length,
                         otherNrOfShifts: (i + 1) % other.path.length, // this will set the otherRoot and otherLeaf at the required pos.
                     }
-                    options.push(temp)
-
+                    option = temp
                 }
             }
 
         }
-        return options
+        return option
 
     }
 
@@ -275,7 +216,9 @@ export class SubGraph {
         let leaf2OtherRootH = false
         let leaf2OtherRootV = false
 
-        let options = []
+        let option = null
+
+        // first try connecting otherLeaf to thisRoot
 
         if (root.xIsEven)
             //for ex root  18 can be reached from otherLeaf  19      left
@@ -303,38 +246,42 @@ export class SubGraph {
                 insertOtherAtIndex: 0,// insert other.path into this.path at pos 0
                 otherNrOfShifts: 0, // No need to rotate the other
             }
-            options.push(temp)
+            option = temp
         }
 
-        if (leaf.xIsEven)
-            //for ex leaf 18 can reach to otherRoot 17         left
-            //for ex leaf 17 can reach to otherRoot 16         left
-            leaf2OtherRootH = (leaf.x == otherRoot.x) && (leaf.y - otherRoot.y == 1)
 
-        else
-            //for ex leaf 14 can reach to otherRoot 15         right
-            //for ex leaf  9 can reach to otherRoot 10         right
-            leaf2OtherRootH = (leaf.x == otherRoot.x) && (leaf.y - otherRoot.y == -1)
+        // if connecting otherLeaf to thisRoot fails, try connecting thisLeaf  to OtherRoot
+        if (!option) {
+            if (leaf.xIsEven)
+                //for ex leaf 18 can reach to otherRoot 17         left
+                //for ex leaf 17 can reach to otherRoot 16         left
+                leaf2OtherRootH = (leaf.x == otherRoot.x) && (leaf.y - otherRoot.y == 1)
+
+            else
+                //for ex leaf 14 can reach to otherRoot 15         right
+                //for ex leaf  9 can reach to otherRoot 10         right
+                leaf2OtherRootH = (leaf.x == otherRoot.x) && (leaf.y - otherRoot.y == -1)
 
 
-        if (leaf.yIsEven && !leaf2OtherRootH)
-            //for ex leaf 18 can reach to otherRoot 26         up
-            //for ex leaf 14 can reach to otherRoot 22         up
-            leaf2OtherRootV = (leaf.y == otherRoot.y) && (leaf.x - otherRoot.x == -1)
-        else
-            //for ex leaf 17 can reach to otherRoot 9         down 
-            //for ex leaf  9 can reach to otherRoot 1         down 
-            leaf2OtherRootV = (leaf.y == otherRoot.y) && (leaf.x - otherRoot.x == 1)
+            if (leaf.yIsEven && !leaf2OtherRootH)
+                //for ex leaf 18 can reach to otherRoot 26         up
+                //for ex leaf 14 can reach to otherRoot 22         up
+                leaf2OtherRootV = (leaf.y == otherRoot.y) && (leaf.x - otherRoot.x == -1)
+            else
+                //for ex leaf 17 can reach to otherRoot 9         down 
+                //for ex leaf  9 can reach to otherRoot 1         down 
+                leaf2OtherRootV = (leaf.y == otherRoot.y) && (leaf.x - otherRoot.x == 1)
 
-        if (leaf2OtherRootH || leaf2OtherRootV) {
-            let temp = {
-                insertOtherAtIndex: this.path.length, // insert other.path into this.path at NEW  pos (this.path.length)
-                otherNrOfShifts: 0, // No need to rotate the other
+            if (leaf2OtherRootH || leaf2OtherRootV) {
+                let temp = {
+                    insertOtherAtIndex: this.path.length, // insert other.path into this.path at NEW  pos (this.path.length)
+                    otherNrOfShifts: 0, // No need to rotate the other
+                }
+                option = temp
             }
-            options.push(temp)
         }
 
-        return options
+        return option
 
 
     }
@@ -361,6 +308,7 @@ export class SubGraph {
     }
 
 }
+
 
 class CuttingSection {
     #cuttingNodes
@@ -423,9 +371,10 @@ const requestHamCycleChange = () => {
     HamCycleStatus = Status.CHECK_NEXT_CYCLE
 }
 
+
 const excuteMove = () => {
-    // currentHamCyclNodeIndex!=0 since the truthy of the number 0 is false
-    if (currentHamCyclNodeIndex != 0 && !currentHamCyclNodeIndex) {
+
+    if (currentHamCyclNodeIndex == null || currentHamCyclNodeIndex < 0 || currentHamCyclNodeIndex > gridSideLen) {
         // currentHamCyclNodeIndex is undifined
         findCurrentHamCyclNodeIndex()
     }
@@ -456,8 +405,6 @@ const excuteMove = () => {
     } else {
 
         // If the move is between 2 nodes without and edge 
-        console.log(`\n\n\n`)
-        console.log(debug)
         console.log(`\n\n\n`)
         console.log("the move is between 2 nodes without and edge!")
         console.log(`The prev currentHamCyclNodeIndex ${currentHamCyclNodeIndex}`)
@@ -548,11 +495,6 @@ const Direction = {
 
 const changeHamCycle = () => {
 
-    // we check that "currentHamCyclNodeIndex!=0" first and then the truthy of "!currentHamCyclNodeIndex", since the truthy of the number 0 is false
-    if (currentHamCyclNodeIndex != 0 && !currentHamCyclNodeIndex) {
-        // currentHamCyclNodeIndex is undifined
-        findCurrentHamCyclNodeIndex()
-    }
 
     //contains nrOfSteps, nodes, and in which directions
     let cuttingPathSections = getCuttingPathSections()
@@ -934,12 +876,11 @@ const genNewHC = (cuttingPathNodes, cuttingPathIndecies, targetNodeIndex) => {
         startNdx = (endNdx + 1) % HC.length
     }
 
-    // Now there is 2 scenario for the unaffected area by the change in the HC
+    // Now there is 2 scenarios for the unaffected area by the change in the HC
     // 1- If the path between target to head is continuous, the characteristics of this scenario is:
     //          * the targetNodeIndex is cuttingPathIndecies[cuttingPathLen - 1]
     //          * UnaffectedPathAfterTarget is empty list
-    //    In this case we have ONLY 1 unaffected area, the whole path is CYCLE (head --> target --> head), 
-    //    and the rest of the other nodes is isolatedSubgraphs.
+    //    In this case we have ONLY 1 unaffected area, the whole path is CYCLE (head --> target --> head), and the rest of the other nodes is isolatedSubgraphs.
     //
     // 2- If the path from target to head is cutted, we will have 2 isolated unaffected areas:
     //    a- path after the target until first cutted point (this is the base of the newHC) = UnaffectedPathAfterTarget
@@ -956,10 +897,10 @@ const genNewHC = (cuttingPathNodes, cuttingPathIndecies, targetNodeIndex) => {
     //     toIndex: the index of "the target" 
 
     /**
-     * What is the optimal notConnectableRange size is it:
+     * What is the optimal notConnectableRange size? is it:
      *      option1 - The whole snakeBody length + cuttingPath: this will make it difficult to reconnect the isolatedSubgraphs to the newHC
      *      option2 - Just the head + cuttingPath: this can result in the possibility where the an isolatedSubgraph been concatenated with a wall where the snakeBody is, and make an unreachable section until the snakeHead traverse the rest of the whole board, which is ok unless the snakeBody is too tall which in turn can cause a collision.
-     *      option3 - TODO Find the optimal length between  (1 to snakeBodyLength) where the reconnecting an isolatedSubgraph is easy and the collision propability is small.
+     *      option3 - notConnectable.to is the target, BUT notConnectable.from is whatever comes furthest away from the target (at the moment when snakeHead reaches the target) either the snakeTail pos OR fst node in the cuttingPath.
     */
 
     let notConnectableRange = {
@@ -976,9 +917,14 @@ const genNewHC = (cuttingPathNodes, cuttingPathIndecies, targetNodeIndex) => {
         //  before + pathdown 
         let _newhcNodes = [...nodesvalues, ...(cuttingPathNodes.map(node => node.value))]
 
+        // this will yields whatever comes furthest away from the target, which is either:
+        // - the snakeTail pos when snakeHead reaches the target, OR
+        // - the snakeHead initial pos before making any move.
+        //   Note: we add 1 to the CuttingPath in the max(… , cuttingPath+1) ,, to include the (initial pos before making any move) to the notConnectableRange
 
-        notConnectableRange.formIndex = _newhcNodes.length - (cuttingPathLen + getSnakeLen()) // (cuttingPathLen + snakeBodyLength) to include halv of the sankeBody in notConnectableRange
-        notConnectableRange.toIndex = _newhcNodes.length - 1
+        let rangFmIndex = _newhcNodes.length - max(getSnakeLen(), (cuttingPathNodes.length + 1))
+        notConnectableRange.formIndex = rangFmIndex
+        notConnectableRange.toIndex = _newhcNodes.length - 1 // this will yields the snakeHead pos when snakeHead reaches the target
 
         newHC = new SubGraph(_newhcNodes, notConnectableRange)
 
@@ -990,8 +936,13 @@ const genNewHC = (cuttingPathNodes, cuttingPathIndecies, targetNodeIndex) => {
         //  before + pathdown + after
         let _newhcNodes = [...unaffectedPathBefore, ...(cuttingPathNodes.map(node => node.value)), ...unaffectedPathAfterTarget]
 
-        notConnectableRange.formIndex = (_newhcNodes.length - (cuttingPathLen + getSnakeLen())) - unaffectedPathAfterTarget.length // (cuttingPathLen +  snakeBodyLength) to include halv of the sankeBody in notConnectableRange
-        notConnectableRange.toIndex = (_newhcNodes.length - 1) - unaffectedPathAfterTarget.length
+        // this will yields whatever comes furthest away from the target, which is either:
+        // - the snakeTail pos when snakeHead reaches the target, OR
+        // - the snakeHead initial pos before making any move.
+        //   Note: we add 1 to the CuttingPath in the max(… , cuttingPath+1) ,, to include the (initial pos before making any move) to the notConnectableRange
+        let rangFmIndex = _newhcNodes.length - unaffectedPathAfterTarget.length - max(getSnakeLen(), (cuttingPathNodes.length + 1))
+        notConnectableRange.formIndex = rangFmIndex
+        notConnectableRange.toIndex = (_newhcNodes.length - 1) - unaffectedPathAfterTarget.length // this will yields the snakeHead pos when snakeHead reaches the target
 
         newHC = new SubGraph(_newhcNodes, notConnectableRange)
     }
@@ -1015,13 +966,13 @@ const circularSlice = (arr, startNdx, endNdx) => {
 
 const reconnectGraph = (isolatedSubgraphList) => {
 
-    // Note: the isolatedSubgraphList wouldn't nor shouldn't concat to notConnectableRange
+    // Note: the isolatedSubgraphList wouldn't nor shouldn't concat inside the notConnectableRange
 
 
     /**
-     * From here there is 2 diff ways to connect the isolated subgrah:
+     * From here there is 2 diff ways to connect the isolated subgraphs:
      * 1- Connect subgraphs without rotating it: just see if an newHC's root or leaf can be concatenated with isolatedSubgraph's leaf or root.
-     *    This does not require that any of the isolatedSubgraphs nor the newHC to be cyclic graph i.e. they're hamiltonian paths but NOT  cycle
+     *    This does not require that any of the isolatedSubgraphs nor the newHC to be cyclic subgraph i.e. they're hamiltonian paths but NOT  cycle
      *    a- take the fst and last nodes in the newHC's path and call them root and leaf respectively.
      *    b- search for a node in any isolatedSubgraph, where that node is either the fst or the last in the isolatedSubgraph and can be connected to either newHC's root or leaf.
      *    c- if found, then splice the 2 subGraphs, and update the notConnectableRange if necessary.
@@ -1030,8 +981,8 @@ const reconnectGraph = (isolatedSubgraphList) => {
      * 
      * 2- Connect isolatedSubgraphs and newHC after some rotation
      *    This require that at least one of the newHC and/or isolatedSubgraphs is cyclic. But the resulting subgraph can be non cyclic if we splice a cyclic and non-cyclic graphs. 
-     *    a- choose a cyclic graph either newHC or an isolatedSubgraph.
-     *    b- search for 2 nodes candidates which can serve as root and leaf in this cyclic graph and also can be concatenated in the the other graph. 
+     *    a- choose a cyclic subgraph either newHC or an isolatedSubgraph.
+     *    b- search for 2 nodes candidates which can serve as root and leaf in the cyclic subgraph and also can be concatenated in the the other subgraph. 
      *    c- if found, then excute the necessary rotaions, and splice the 2 subGraphs and update the notConnectableRange if necessary.
      *    d- repeat until there isn't any cyclic subgraph.
      */
@@ -1050,12 +1001,8 @@ const reconnectGraph = (isolatedSubgraphList) => {
 
 
     if (isConnected) {
-        debug.prevHC = HC
-        let { x, y } = orderedNodes[HC[currentHamCyclNodeIndex]]
-        debug.snakeHead = { x, y }
-        debug.food = getFoodPosition()
-        tempValidPath(newHC)
 
+        assert_newHC_validity(newHC)
 
         HC = newHC.path.map(node => node.value)
         newHC = []
@@ -1063,8 +1010,7 @@ const reconnectGraph = (isolatedSubgraphList) => {
         findCurrentHamCyclNodeIndex()
         visualizeHC(HC)
         HamCycleStatus = Status.CONNECTED_OK
-    }
-    else {
+    } else {
 
         // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤DEV visulize path¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
         isolatedSubgraphList.forEach(g => {
@@ -1084,8 +1030,6 @@ const reconnectGraph = (isolatedSubgraphList) => {
         // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
 
 
-
-
         // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤DEV visulize path¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
         // console.log("isConnected is false")
         visualizeHC(HC)
@@ -1095,7 +1039,19 @@ const reconnectGraph = (isolatedSubgraphList) => {
 
 }
 
-const tempValidPath = (newHC) => {
+const assert_newHC_validity = (newHC) => {
+
+    const debug = {
+        prevHC: [],
+        snakeHead: null,
+        food: null
+    }
+    let headPos = getSnakeHead()
+    let head = headPos.x * gridSideLen + headPos.y
+
+    let foodPos = getFoodPosition()
+    let target = (foodPos.x * gridSideLen) + foodPos.y
+
 
     for (let i = 0; i < newHC.path.length - 1; i++) {
         let nextNodeH = false
@@ -1115,16 +1071,31 @@ const tempValidPath = (newHC) => {
             nextNodeV = (currNode.y == nextNode.y) && (currNode.x - nextNode.x == 1)
 
         if (!nextNodeH && !nextNodeV) {
+            debug.prevHC = HC
+            debug.snakeHead = headPos
+            debug.food = foodPos
             throw 'invalid path'
         }
-
     }
+
+    let headIndexInNewHC = newHC.path.findIndex(node => node.value == head)
+    let targetIndexInNewHC = newHC.path.findIndex(node => node.value == target)
+
+    if (targetIndexInNewHC == -1 || headIndexInNewHC == -1) {
+        throw `the head index in the newHC is ${headIndexInNewHC}, the target index in the newHC is ${targetIndexInNewHC},, Both of which must be not eq to -1`
+    }
+    // If the notConnectable range worked properly, then the nr of steps between head and target following the newHC MUST be lte ((2 * gridSideLen) + 1), which is the theoretical limit of the cuttingPath, accourding to the current implementation.
+    let steps = ((targetIndexInNewHC - headIndexInNewHC) + totalNrOfCells) % totalNrOfCells
+
+    if (steps >= (2 * gridSideLen) + 1) { // The theoretical limit for the nr of steps in cuttingPath is lte (2 * gridSideLen)
+        debug.prevHC = HC
+        debug.snakeHead = headPos
+        debug.food = foodPos
+        throw `The path between the head and the target has ${steps} steps which is gt ((2 * gridSideLen) + 1) "the theoretical limit of the cuttingPath", accourding to the current implementation.! `
+    }
+
 }
-const debug = {
-    prevHC: [],
-    snakeHead: null,
-    food: null
-}
+
 const reconnectIsolatedSubgraphsWithRotation_Rec = (isolatedSubgraphList) => {
     // basecase
     if (isolatedSubgraphList.length == 0)
@@ -1136,22 +1107,20 @@ const reconnectIsolatedSubgraphsWithRotation_Rec = (isolatedSubgraphList) => {
     for (let i = 0; i < isolatedSubgraphList.length && !found; i++) {
 
         let isg = isolatedSubgraphList[i]
-        let options = []
+        let option = null
         if (isg.isCyclic) {
-            options = newHC.spliceCyclicOtherOptions(isg)
+            option = newHC.spliceCyclicOtherOptions(isg)
 
-            if (options.length > 0) {
+            if (option) {
                 found = true
-                let op = options[0]
-                newHC.spliceIn(isg, op.insertOtherAtIndex, op.otherNrOfShifts)
+                newHC.spliceIn(isg, option.insertOtherAtIndex, option.otherNrOfShifts)
             }
 
         } else if (newHC.isCyclic) {
-            options = isg.spliceCyclicOtherOptions(newHC)
-            if (options.length > 0) {
+            option = isg.spliceCyclicOtherOptions(newHC)
+            if (option) {
                 found = true
-                let op = options[0]
-                isg.spliceIn(newHC, op.insertOtherAtIndex, op.otherNrOfShifts)
+                isg.spliceIn(newHC, option.insertOtherAtIndex, option.otherNrOfShifts)
                 newHC = isg
             }
 
@@ -1160,8 +1129,14 @@ const reconnectIsolatedSubgraphsWithRotation_Rec = (isolatedSubgraphList) => {
 
         if (found) {
             isolatedSubgraphList.splice(i, 1)
+            // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤DEV visulize path¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+            isolatedSubgraphList.forEach(g => {
+                let path = g.path.map(n => n.value)
+                visualizeHC(path)
+            })
+            visualizeHC(newHC.path.map(n => n.value))
+            // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
 
-            
             if (!newHC.isCyclic) {
                 // if the lately updated newHC is NOT cyclic, the first try to  reconnect the rest of isolatedSubgraphList without a rotation.
                 reconnectIsolatedSubgraphs_Rec(isolatedSubgraphList)
@@ -1188,15 +1163,21 @@ const reconnectIsolatedSubgraphs_Rec = (isolatedSubgraphList) => {
     for (let i = 0; i < isolatedSubgraphList.length && !found; i++) {
 
         let isg = isolatedSubgraphList[i]
-        let options = newHC.spliceNonCyclicOtherOptions(isg)
+        let option = newHC.spliceNonCyclicOtherOptions(isg)
 
-        found = options.length > 0
 
-        if (found) {
-            let op = options[0]
-            newHC.spliceIn(isg, op.insertOtherAtIndex, op.otherNrOfShifts)
-
+        if (option) {
+            found = true
+            newHC.spliceIn(isg, option.insertOtherAtIndex, option.otherNrOfShifts)
             isolatedSubgraphList.splice(i, 1)
+
+            // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤DEV visulize path¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
+            isolatedSubgraphList.forEach(g => {
+                let path = g.path.map(n => n.value)
+                visualizeHC(path)
+            })
+            visualizeHC(newHC.path.map(n => n.value))
+            // ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤
 
             reconnectIsolatedSubgraphs_Rec(isolatedSubgraphList)
         }
