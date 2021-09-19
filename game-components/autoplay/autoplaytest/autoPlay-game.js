@@ -57,7 +57,8 @@ const init = () => {
 const main = () => {
 
     console.log("started")
-    const t0 = performance.now();
+        const t0 = performance.now();
+
 
     for (let index = 0; index < 2000; index++) {
 
@@ -91,6 +92,7 @@ const main = () => {
 
     saveLog()
     console.log("finished")
+
 }
 
 

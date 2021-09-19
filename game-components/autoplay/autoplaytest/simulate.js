@@ -39,6 +39,9 @@ const main = (currentTime) => {
         let HCid = moves[i].HcId
         HC = data.HCs[HCid]
 
+        if (i==225) {
+            let t = 0
+        }
         // console.log(moves[i])
 
         // given the snakeHead init pos is fixed [0,0]

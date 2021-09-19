@@ -1,8 +1,13 @@
 
 
-const gridSideLen = 10 // If the game is in autoplay mode, then this number has to be an even number 
+const gridSideLen = 10
+ // If the game is in autoplay mode, then this number has to be an even number 
 const totalNrOfCells =  gridSideLen * gridSideLen
 
+
+if (gridSideLen >= 32)  
+  throw `Err this implementation is only for graphs with gridSideLen < 32 !!`
+ 
 const randomGridPosition = () => {
   return {
     x: Math.floor(Math.random() * gridSideLen),
