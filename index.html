@@ -14,43 +14,114 @@
       justify-content: center;
       align-items: center;
       margin: 0;
-      background-color: rgb(22, 21, 21);
+      background-color: rgb(0, 0, 0);
+
     }
 
     .container {
       display: flex;
       flex-direction: column;
+      align-items: center;
+
+      width: 100vmin;
+      height: 100vmin;
     }
 
     .container-top {
       display: flex;
       justify-content: start;
+
       align-items: center;
-      background-color: #FFF;
+      background: rgb(101, 124, 148);
+      height: 30vmin;
+      width: 60vmin;
+
     }
 
     .form-container {
       flex-grow: 1;
       display: flex;
       flex-direction: column;
+      justify-content: space-around;
       height: 100%;
-      justify-content: space-evenly;
-      align-items: end;
-      background-color: rgb(139, 138, 138);
+      padding-left: 20px;
 
     }
 
 
-/* ------------------------ slider ------------------------ */
+
+    #game-board-auto {
+
+      display: grid;
+      background-color: #CCC;
+      width: 30vmin;
+      height: 30vmin;
+    }
+
+
+    .container-bottom {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 70vmin;
+      background: rgb(44, 62, 80);
+    }
+
+    .container-game-board-player {
+      width: 60vmin;
+      height: 60vmin;
+
+    }
+
+
+    #overlay {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      width: 60vmin;
+      height: inherit;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 2;
+    }
+
+    .overlay-msg {
+      /* position: absolute; */
+      /* top: 50%; */
+      /* left: 50%; */
+      font-size: 20px;
+      color: white;
+      text-align: center;
+      /* transform: translate(-50%, -50%); */
+      /* -ms-transform: translate(-50%, -50%); */
+    }
+    .overlay-msg-won{
+      color: rgb(2, 22, 207);
+    }
+    .overlay-msg-gameover{
+      color: rgb(255, 32, 32);
+    }
+
+
+    #game-board-player {
+      display: grid;
+      background-color: #CCC;
+      width: inherit;
+      height: inherit;
+    }
+
+
+    /* ------------------------ slider ------------------------ */
     .range-slider {
-      margin: 60px 0 0 0%;
       display: flex;
       align-items: center;
+      height: min-content;
     }
 
     .range-slider__range {
       -webkit-appearance: none;
-      /* width: calc(100% - (73px)); */
+      width: calc(100% - (150px));
       height: 10px;
       border-radius: 5px;
       background: #d7dcdf;
@@ -64,7 +135,7 @@
       height: 20px;
       border: 0;
       border-radius: 50%;
-      background: #2c3e50;
+      background: rgb(44, 62, 80);
       cursor: pointer;
       -moz-transition: #2c3e50 0.15s ease-in-out;
       transition: #2c3e50 0.15s ease-in-out;
@@ -84,16 +155,16 @@
 
     .range-slider__value {
       display: inline-block;
+      width: 30px;
       position: relative;
-      width: 60px;
       color: #fff;
-      line-height: 20px;
       text-align: center;
       border-radius: 3px;
       background: #2c3e50;
       padding: 5px 10px;
       margin-left: 8px;
     }
+
     .range-slider__value:after {
       position: absolute;
       top: 8px;
@@ -108,19 +179,8 @@
 
     /* ------------------------ end slider ------------------------ */
 
-
-    #game-board-autoplay {
-      display: grid;
-      background-color: #CCC;
-      width: 20vmin;
-      height: 20vmin;
-    }
-
-    #game-board {
-      display: grid;
-      background-color: #CCC;
-      width: 80vmin;
-      height: 80vmin;
+    .container-score {
+      color: rgb(255, 255, 255);
     }
 
     .cell {
@@ -225,30 +285,68 @@
       background-color: red;
     }
 
+
     /* *********************************************************/
   </style>
 
   <script src="./game.js" defer></script>
-  <!-- <script src="./game-components/autoplay/autoplaytest/autoPlay-game.js" defer></script> -->
-  <!-- <script src="./game-components/autoplay/autoplaytest/simulate.js" defer></script> -->
 
 </head>
 
 <body>
   <div class="container">
     <div class="container-top">
-      <!-- <div id="game-board-autoplay"></div> -->
+      <div id="game-board-auto"></div>
+
       <div class="form-container">
+
+
+        <div>
+          <label for="difficulty">Difficulty:</label>
+          <select name="difficulty" id="selectDifficulty" autocomplete="off">
+            <option value="EASY">Easy</option>
+            <option value="MEDIUM" selected>Medium</option>
+            <option value="HARD">Hard</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="Size">Size:</label>
+          <select name="Size" id="selectSize" autocomplete="off">
+            <option value="10">10 X 10</option>
+            <option value="20" selected>20 X 20</option>
+            <option value="30">30 x 30</option>
+          </select>
+        </div>
 
         <div class="range-slider">
           <label for="speed-range"> Snake speed: </label>
           <input id="speed-range" class="range-slider__range" type="range" value="15" min="1" max="100">
-          <span class="range-slider__value">0</span>
+          <span id="speed-range-value" class="range-slider__value">0</span>
         </div>
+
+      </div>
+
+
+
+    </div>
+
+    <div class="container-bottom">
+      <div id="overlay">
+        <div id="overlay-msg" class="overlay-msg">Press space to start the game! </div>
+      </div>
+      <div class="container-score"> <span id="score"></span></div>
+
+      <div class="container-game-board-player">
+        <div id="game-board-player"></div>
+
+      </div>
+      <div style="color: rgb(177, 209, 243);width: 100%;">
+        <p>Press "D" to increase the speed or "A" to decrease it.</p>
+
       </div>
 
     </div>
-    <div id="game-board"></div>
   </div>
 </body>
 

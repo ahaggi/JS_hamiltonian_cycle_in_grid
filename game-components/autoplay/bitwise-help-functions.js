@@ -1,58 +1,54 @@
-import { gridSideLen, totalNrOfCells } from "./gameBoard"
+import { gridSideLen, totalNrOfCells } from '../grid.js'
 const floor = Math.floor
 const ceil = Math.ceil
 
-/*********************************************************** */
-//       constants used just in the Bitwise operations
-
-
-// let sl = 1
-// while (((sl + 1) * gridSideLen) < 30)
-//   sl += 1
-// // BITS_PER_SECTION must be multiple of gridSideLen and less than or eq 30
-// const BITS_PER_SECTION = sl * gridSideLen
-// const NR_OF_SECTIONS = ceil((totalNrOfCells) / BITS_PER_SECTION)
 
 
 
-const MAX_USABLE_BITS = 32
-let nr_of_rows_per_section = floor(MAX_USABLE_BITS / gridSideLen)
+
+var SECTIONS_PER_ROW
+var BITS_PER_SECTION
+var NR_OF_SECTIONS
+
+const init = () => {
+  const MAX_USABLE_BITS = 32
+  let nr_of_rows_per_section = floor(MAX_USABLE_BITS / gridSideLen)
 
 
-let temp_bits_per_section
-let temp_nr_of_sections
+  let temp_bits_per_section
+  let temp_nr_of_sections
 
-if (gridSideLen < MAX_USABLE_BITS) {
-  temp_bits_per_section = nr_of_rows_per_section * gridSideLen
-  temp_nr_of_sections = ceil((totalNrOfCells) / temp_bits_per_section)
-} else {
+  if (gridSideLen < MAX_USABLE_BITS) {
+    temp_bits_per_section = nr_of_rows_per_section * gridSideLen
+    temp_nr_of_sections = ceil((totalNrOfCells) / temp_bits_per_section)
+  } else {
 
-  let found = false
-  let j = MAX_USABLE_BITS;
-  while (j > 0 && !found) {
-    if ((gridSideLen % j) == 0) {
-      found = true
-      temp_bits_per_section = j
-      // console.log(`i  ${i}   ,  BITS_PER_SECTION   ${j}`)
+    let found = false
+    let j = MAX_USABLE_BITS;
+    while (j > 0 && !found) {
+      if ((gridSideLen % j) == 0) {
+        found = true
+        temp_bits_per_section = j
+        // console.log(`i  ${i}   ,  BITS_PER_SECTION   ${j}`)
+      }
+      j--
     }
-    j--
-  }
-  if (!temp_bits_per_section) throw `can't compute a BITS_PER_SECTION for the gridSideLen ${gridSideLen}!`
+    if (!temp_bits_per_section) throw `can't compute a BITS_PER_SECTION for the gridSideLen ${gridSideLen}!`
 
-  temp_nr_of_sections = totalNrOfCells / temp_bits_per_section
+    temp_nr_of_sections = totalNrOfCells / temp_bits_per_section
+
+  }
+
+  SECTIONS_PER_ROW = floor(gridSideLen / temp_bits_per_section)
+  BITS_PER_SECTION = temp_bits_per_section
+  NR_OF_SECTIONS = temp_nr_of_sections
+
+  // console.log(`gridSideLen ${gridSideLen}`)
+  // console.log(`BITS_PER_SECTION ${BITS_PER_SECTION}`)
+  // console.log(`NR_OF_SECTIONS ${NR_OF_SECTIONS}`)
+
 
 }
-const SECTIONS_PER_ROW = floor(gridSideLen / temp_bits_per_section)
-const BITS_PER_SECTION = temp_bits_per_section
-const NR_OF_SECTIONS = temp_nr_of_sections
-
-
-
-
-console.log(`gridSideLen ${gridSideLen}`)
-console.log(`BITS_PER_SECTION ${BITS_PER_SECTION}`)
-console.log(`NR_OF_SECTIONS ${NR_OF_SECTIONS}`)
-/*********************************************************** */
 
 
 
@@ -334,6 +330,7 @@ const my_find_index = (nodeValue, index_matrix_mask) => {
 
 
 export {
+  init as init_bitwise_variables,
   BITS_PER_SECTION,
   NR_OF_SECTIONS,
   SECTIONS_PER_ROW,

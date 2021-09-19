@@ -1,28 +1,26 @@
-var inputDirection = { deltaX: 0, deltaY: 0 }
-var lastInputDirection = { deltaX: 0, deltaY: 0 }
+export const  AutoInput = class {
+  constructor() {
+    this.inputDirection = { deltaX: 0, deltaY: 0 }
+    this.lastInputDirection = { deltaX: 0, deltaY: 0 }
+  }
 
-const getInputDirection = () => {
-  lastInputDirection = inputDirection
-  return inputDirection
-}
+  getInputDirection() {
+    this.lastInputDirection = this.inputDirection
+    return this.inputDirection
+  }
 
-// For testing/ simulating
-const setInputDirection = (in_d) => {
-  inputDirection = in_d
-}
+  // For testing/ simulating
+  setInputDirection(in_d) {
+    this.inputDirection = in_d
+  }
 
-const resetInputDirection = () => {
-  inputDirection = { deltaX: 0, deltaY: 0 }
-  lastInputDirection = { deltaX: 0, deltaY: 0 }
-}
+  ResetInputDirection() {
+    this.inputDirection = { deltaX: 0, deltaY: 0 }
+    this.lastInputDirection = { deltaX: 0, deltaY: 0 }
+  }
 
-const forLogOnly_inputDirection = () => {
-  return inputDirection
-}
+  forLogOnly_inputDirection() {
+    return this.inputDirection
+  }
 
-export {
-  getInputDirection,
-  setInputDirection,
-  resetInputDirection,
-  forLogOnly_inputDirection
 }

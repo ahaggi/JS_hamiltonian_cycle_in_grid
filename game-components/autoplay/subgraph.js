@@ -1,5 +1,6 @@
 
-import { gridSideLen, totalNrOfCells } from '../grid.js'
+import { gridSideLen } from '../grid.js'
+import { orderedNodes } from './autoPlay.js'
 import {
 
     calc_pivots_other_to_this_upper_wall_by_row,
@@ -543,13 +544,11 @@ class SubGraph {
 
 }
 
-const orderedNodes = Array.from({ length: (totalNrOfCells) }, (_, i) => new Node(i))
 
 
 export {
     Node,
     SubGraph,
-    orderedNodes
 }
 
 

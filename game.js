@@ -1,153 +1,160 @@
-import { outsideGrid, totalNrOfCells } from './game-components/grid.js'
-import { gameBoard, clear as clearBoard } from './game-components/autoplay/gameBoard.js'
-import { init as initSnake, update as updateSnake, draw as drawSnake, getSnakeHead, snakeIntersection, getSnakeLen } from './game-components/snake.js'
-import { init as initFood, update as updateFood, draw as drawFood, getFoodPosition } from './game-components/food.js'
+
+
+import { init as initFood, update as updateFood, draw as drawFood } from './game-components/food.js'
 import { snakeSpeed } from './game-components/speedSlider.js'
+import { setGridSideLen, totalNrOfCells } from './game-components/grid.js'
+
+import { playerGameBoard, playerSnake, playerMain, playerGameReset, getPlayerGameOverStatus } from './game-components/player/game.js'
+
+import { autoGameBoard, autoSnake, autoMain, autoGameReset, getAutoGameOverStatus, Difficulty } from './game-components/autoplay/game.js'
 
 
-import { init as initAutoplay, excuteMove, HC } from "./game-components/autoplay/autoPlay.js"
-import { visualizeHC } from './game-components/autoplay/hamCycleGridVisualization.js'
-import { createNewMoveLog, updateCurrGameLog, updateCurrMoveLog, createNewGameLog, saveLog } from "./game-components/autoplay/autoplaytest/log"
-import { forLogOnly_inputDirection } from './game-components/autoplay/input.js'
+
+const reset = () => {
 
 
-let lastRenderTime = 0
-let gameOver
-let gameWon
-// Only for logging purpose
-let logHC
+  gameOverAuto = false
+  gameWonAuto = false
 
+  gameOverPlayer = false
+  gameWonPlayer = false
 
-// ######## Just for log purposing ########
+  playerGameReset()
+  autoGameReset(difficultyLevel)
 
-const logNewMove = () => {
-  if (
-    logHC.some((v, i) => v != HC[i])
-  ) {
-    logHC = HC
-    updateCurrGameLog({
-      addNewHC: HC
-    })
-  }
-
-  createNewMoveLog()
-  updateCurrMoveLog({
-    moveDirection: forLogOnly_inputDirection(),
-    foodPos: getFoodPosition()
-  })
-}
-
-const logNewGame = () => {
-  logHC = HC
-  createNewGameLog()
-  updateCurrGameLog({ addNewHC: HC })
-
-}
-
-const updatelog = () => {
-  if (gameOver) {
-    updateCurrGameLog({ res: false })
-    saveLog()
-
-  } else if (gameWon) {
-    updateCurrGameLog({ res: true })
-    saveLog()
-  }
-}
-
-//#########################################
-
-
-const init = () => {
-  gameOver = false
-  gameWon = false
-
-  initSnake()
-  initFood()
-  clearBoard()
-
-  initAutoplay()
-
-  // ######## Just for log purposing ########
-  logNewGame()
-  // ########################################
-
+  initFood(playerSnake, autoSnake)
 }
 
 const main = (currentTime) => {
-  if (gameOver) {
-    if (confirm('You lost. Press ok to restart.')) {
-      // window.location = '/'
-      // ######## Just for log purposing ########
-      updatelog()
-      // ########################################
-      init()
-    } else {
-      return
-    }
-  } else if (gameWon) {
-    if (confirm('Congratulations!. Press ok to restart.')) {
-      // window.location = '/'
-      // ######## Just for log purposing ########
-      updatelog()
-      // ########################################
-      init()
-    } else {
-      return
-    }
-  }
-
   // Why is requestAnimationFrame better than setInterval or setTimeout?
   // https://stackoverflow.com/a/38709924
-  window.requestAnimationFrame(main)
+  animationReq = requestAnimationFrame(main)
+
   const secondsSinceLastRender = (currentTime - lastRenderTime) / 1000
   if (secondsSinceLastRender < (1 / snakeSpeed)) return
 
   lastRenderTime = currentTime
 
-
-  excuteMove()
-
-  // ######## Just for log purposing ########
-  logNewMove()
-  // ########################################
-
-
+  playerMain(currentTime)
+  autoMain(currentTime)
   update()
-  if (!gameOver) {
+  checkGameStatus()
+
+  if (gameWonPlayer || gameOverPlayer || gameOverAuto || gameWonAuto)
+    stopGame()
+  else
     draw()
-  }
 }
 
 const update = () => {
-  updateSnake()
-  updateFood()
-  checkGameStatus()
+  updateFood(playerSnake, autoSnake)
 }
 
 const draw = () => {
-  clearBoard()
-  visualizeHC()
-  drawSnake(gameBoard)
-  drawFood(gameBoard)
+  drawFood(playerGameBoard, autoGameBoard)
 }
 
 const checkGameStatus = () => {
-  gameOver = outsideGrid(getSnakeHead()) || snakeIntersection()
-  gameWon = getSnakeLen() >= (totalNrOfCells) 
-  // console.log(`  ${getSnakeLen()}    ${gameWon}`)
+  // gameOver's value depends on updating the snakeHead's pos
+  // gameWon's  value depends on the updating of the food which in turn can update the snake's length
+
+  gameOverPlayer = getPlayerGameOverStatus()
+  gameWonPlayer = playerSnake.getSnakeLen() >= (totalNrOfCells) 
+
+  gameOverAuto = getAutoGameOverStatus()
+  gameWonAuto = autoSnake.getSnakeLen() >= (totalNrOfCells) 
+}
+
+/******************************************************* EventListener ****************************************************** */
+var overlay = document.getElementById("overlay")
+var selectDifficulty = document.getElementById("selectDifficulty")
+var selectSize = document.getElementById("selectSize")
+
+selectDifficulty.addEventListener('change', (e) => {
+  difficultyLevel = e.target.value
+  reset()
+  stopGame()
+  selectDifficulty.blur()
+})
+selectSize.addEventListener('change', (e) => {
+  let nr = +(e.target.value)
+  setGridSideLen(nr)
+  reset()
+  stopGame()
+  selectSize.blur()
+})
+
+window.addEventListener('keydown', e => {
+  if (e.key === ' ') {
+    if (gameRunning) {
+      stopGame()
+    } else {
+      startGame()
+    }
+  }
+})
+
+const stopGame = () => {
+  let overlayMsgElem  =document.getElementById("overlay-msg")
+  let msg =''
+  let cssClass = ''
+  if (gameOverPlayer || gameWonAuto) {
+    msg = 'You lost. Press space to restart.'
+    cssClass = 'overlay-msg-gameover'
+
+  } else if (gameWonPlayer || gameOverAuto) {
+    msg = gameWonPlayer ? `Congratulations!\nYou won!.\nPress space to restart.` : `Congratulations!\nThe other snake lost!\n. Press space to restart. `
+    cssClass = 'overlay-msg-won'
+  } else {
+    msg = `Press space to restart the game. `
+    cssClass = 'overlay-msg'
+  }
+  overlayMsgElem.innerHTML = msg
+  overlayMsgElem.className = cssClass
+
+  overlay.style.display = 'flex'
+  gameRunning = false
+  // https://developer.mozilla.org/en-US/docs/Web/API/Window/cancelAnimationFrame
+  cancelAnimationFrame(animationReq);
+}
+
+const startGame = () => {
+  if (gameWonPlayer || gameOverPlayer || gameOverAuto || gameWonAuto) {
+    reset()
+  }
+  overlay.style.display = 'none'
+  gameRunning = true
+
+  // Why is requestAnimationFrame better than setInterval or setTimeout?
+  // https://stackoverflow.com/a/38709924
+  // https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
+
+  animationReq = requestAnimationFrame(main)
 }
 
 
-init()
+
+/************************************************************************************************************************ */
+
+const requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+  window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+const cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
 
-// Why is requestAnimationFrame better than setInterval or setTimeout?
-// https://stackoverflow.com/a/38709924
-// https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
-window.requestAnimationFrame(main)
+var difficultyLevel = Difficulty.MEDIUM
+setGridSideLen(20)
 
+var gameRunning = false
+var animationReq;
 
+var lastRenderTime = 0
 
+var gameOverAuto
+var gameWonAuto
 
+var gameOverPlayer
+var gameWonPlayer
+
+reset()
 

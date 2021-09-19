@@ -1,0 +1,33 @@
+
+import { gridSideLen, totalNrOfCells } from './grid.js'
+
+
+const createNew = (ElementId) => {
+  const gameBoard = document.getElementById(ElementId)
+  gameBoard.innerHTML = ''
+  gameBoard.style.gridTemplateRows = `repeat(${gridSideLen}, 1fr)`
+  gameBoard.style.gridTemplateColumns = `repeat(${gridSideLen}, 1fr)`
+
+
+  // create the autoGameBoard's cells
+  for (let i = 0; i < totalNrOfCells; i++) {
+    const cellElement = document.createElement('div')
+    cellElement.classList.add('cell')
+    gameBoard.appendChild(cellElement)
+  }
+
+  return gameBoard
+}
+
+const clear = (gameBoard) => {
+  for (let i = 0; i < totalNrOfCells; i++) {
+    // clear the board from snake and food
+    // gameBoard.children[i].classList.remove('snake', 'food')
+    gameBoard.children[i].className = "cell"
+  }
+}
+
+export {
+  createNew,
+  clear,
+}
